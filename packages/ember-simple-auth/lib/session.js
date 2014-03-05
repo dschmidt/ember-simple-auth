@@ -77,10 +77,20 @@ Ember.SimpleAuth.Session = Ember.ObjectProxy.extend({
       this.container.lookup(authenticatorFactory).restore(restoredContent).then(function(content) {
         _this.setup(authenticatorFactory, content);
       }, function() {
-        _this.store.clear();
+        if (!this.store.isLocked()) {
+            Ember.Logger.debug('******** INIT: STORE IS NOT LOCKED: 1');
+            _this.store.clear();
+        } else {
+            Ember.Logger.debug('******** INIT: STORE IS LOCKED: 1');
+        }
       });
     } else {
-      this.store.clear();
+        if (!this.store.isLocked()) {
+            Ember.Logger.debug('******** INIT: STORE IS NOT LOCKED: 2');
+            this.store.clear();
+        } else {
+            Ember.Logger.debug('******** INIT: STORE IS LOCKED: 2');
+        }
     }
   },
 
@@ -154,8 +164,20 @@ Ember.SimpleAuth.Session = Ember.ObjectProxy.extend({
     });
     this.bindToAuthenticatorEvents();
     var data = Ember.$.extend({ authenticatorFactory: authenticatorFactory }, this.content);
-    this.store.clear();
-    this.store.persist(data);
+
+    if(!this.store.isLocked()) {
+        Ember.Logger.debug('******** SETUP: STORE IS NOT LOCKED');
+        Ember.Logger.debug('******** SETUP: LOCK');
+        this.store.lock();
+        Ember.Logger.debug('******** SETUP: CLEAR');
+        this.store.clear();
+        Ember.Logger.debug('******** SETUP: PERSIST');
+        this.store.persist(data);
+        Ember.Logger.debug('******** SETUP: UNLOCK');
+        this.store.unlock();
+    } else {
+        Ember.Logger.debug('******** SETUP: STORE IS LOCKED');
+    }
   },
 
   /**
@@ -168,7 +190,13 @@ Ember.SimpleAuth.Session = Ember.ObjectProxy.extend({
       authenticatorFactory: null,
       content:           null
     });
-    this.store.clear();
+
+    if(!this.store.isLocked()) {
+        Ember.Logger.debug('******** CLEAR: CLEAR');
+        this.store.clear();
+    } else {
+        Ember.debug('******** CLEAR: LOCKED');
+    }
   },
 
   /**

@@ -50,5 +50,15 @@ Ember.SimpleAuth.Stores.Base = Ember.Object.extend(Ember.Evented, {
     @method clear
   */
   clear: function() {
+  },
+
+  isLocked: function() {
+      return false;
+  },
+
+  lock: function() {
+  },
+
+  unlock: function() {
   }
 });
